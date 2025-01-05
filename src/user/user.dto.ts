@@ -1,9 +1,10 @@
 import { Optional } from "@nestjs/common";
 import { IsEmail, IsInt, IsNotEmpty, IsString, Matches, MaxLength, MinLength } from "class-validator";
+import { RoleEntity } from "src/role/role.entity";
 
 export class UserDTO {
     @Optional()
-    userid: string;
+    userid: number;
 
     @IsNotEmpty({ message: 'Please enter a valid name' })
     @IsString()
@@ -33,6 +34,9 @@ export class UserDTO {
     address: string;
     @Optional()
     filename: string;
+
+    @IsNotEmpty({ message: 'Role is required' })
+    role: any;
 }
 
 export class loginDTO {

@@ -11,9 +11,24 @@ export class UserService {
     constructor(@InjectRepository(UserEntity)
     private userRepo: Repository<UserEntity>,
         private jwtService: JwtService
-
+    // @InjectRepository(RoleEntity)
+    // private roleRepo: Repository<RoleEntity>,
+        
     ) { }
+    // async addRole(myrole: RoleEntity): Promise<RoleEntity> {
+    //     return await this.roleRepo.save(myrole);
+    // }
+
+    // async showRoles(): Promise<RoleEntity[]> {
+    //     return await this.roleRepo.find();
+    // }
+
+    // async getRole(id: number): Promise<RoleEntity>{
+    //     return await this.roleRepo.findOne(id);
+    // }
+
     async addUser(myobj: UserEntity): Promise<UserEntity> {
+        
         return await this.userRepo.save(myobj);
     }
     async findOne(logindata: loginDTO): Promise<any> {
@@ -21,7 +36,7 @@ export class UserService {
     }
 
     async showProfile(username: string): Promise<UserEntity> {
-        return await this.userRepo.findOneBy({ username: username });
+        return await this.userRepo.findOne({where: { username }, relations: ['role']});
     }
     async updateProfile(username: string, UpdateInfo: UpdateDTO): Promise<any> {
         await this.userRepo.update({ username: username }, UpdateInfo);

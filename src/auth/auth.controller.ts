@@ -4,10 +4,16 @@ import { loginDTO, UserDTO } from "src/user/user.dto";
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MulterError, diskStorage } from 'multer';
 import * as bcrypt from 'bcrypt';
+import { RoleService } from "src/role/role.service";
+import { CreateRoleDTO } from "src/role/role.dto";
 
 @Controller('auth')
 export class AuthController{
-    constructor(private authservice: AuthService){}
+    constructor(
+        private authservice: AuthService,
+        private roleservice: RoleService
+
+    ){}
 
     @Post('signup')
     @UseInterceptors(FileInterceptor('myfile',
@@ -29,12 +35,14 @@ export class AuthController{
         }
     ))
     @UsePipes(new ValidationPipe)
-    async addUser(@Body() myobj: UserDTO, @UploadedFile() myfile: Express.Multer.File): Promise<UserDTO> {
+    async addUser(@Body() userinfo: UserDTO, @UploadedFile() myfile: Express.Multer.File): Promise<UserDTO> {
+        const role = await this.roleservice.getRoleById(userinfo.role);
+        // console.log(role);
         const salt = await bcrypt.genSalt();
-        const hashedpassword = await bcrypt.hash(myobj.password, salt);
-        myobj.password = hashedpassword;
-        myobj.filename = myfile.filename;
-        return this.authservice.signup(myobj);
+        const hashedpassword = await bcrypt.hash(userinfo.password, salt);
+        userinfo.password = hashedpassword;
+        userinfo.filename = myfile.filename;
+        return this.authservice.signup(userinfo);
     }
 
     @Post('signin')

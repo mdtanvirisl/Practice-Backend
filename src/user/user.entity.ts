@@ -1,9 +1,10 @@
-import { Entity, Column, PrimaryGeneratedColumn } from "typeorm";
+import { RoleEntity } from "src/role/role.entity";
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from "typeorm";
 
 @Entity("user")
 export class UserEntity {
-    @PrimaryGeneratedColumn('uuid')
-    userid: string;
+    @PrimaryGeneratedColumn()
+    userid: number;
 
     @Column({ name: 'fullName', type: 'varchar', length: 150, update: true })
     name: string;
@@ -22,4 +23,8 @@ export class UserEntity {
 
     @Column({ nullable: true })
     filename: string;
+
+    @ManyToOne(() => RoleEntity, (role) => role.users, { nullable: false })
+    role: RoleEntity;
 }
+
