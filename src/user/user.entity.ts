@@ -1,5 +1,6 @@
 import { RoleEntity } from "src/role/role.entity";
-import { Entity, Column, PrimaryGeneratedColumn, ManyToOne } from "typeorm";
+import { Entity, Column, PrimaryGeneratedColumn, ManyToOne, ManyToMany, JoinTable, OneToMany } from "typeorm";
+import { TaskEntity } from "./task.entity";
 
 @Entity("user")
 export class UserEntity {
@@ -26,5 +27,13 @@ export class UserEntity {
 
     @ManyToOne(() => RoleEntity, (role) => role.users, { nullable: false })
     role: RoleEntity;
+
+    @ManyToMany(() => TaskEntity)
+    @JoinTable()
+    task: TaskEntity;
+
+    @OneToMany(() => TaskEntity, (task) => task.createdBy, { nullable: false })
+    tasks: TaskEntity[];
+
 }
 

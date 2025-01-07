@@ -5,14 +5,12 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { MulterError, diskStorage } from 'multer';
 import * as bcrypt from 'bcrypt';
 import { RoleService } from "src/role/role.service";
-import { CreateRoleDTO } from "src/role/role.dto";
 
 @Controller('auth')
 export class AuthController{
     constructor(
         private authservice: AuthService,
         private roleservice: RoleService
-
     ){}
 
     @Post('signup')
@@ -51,9 +49,8 @@ export class AuthController{
 
         const result = await this.authservice.signin(logindata);
         if (result) {
-            session.email = logindata.email;
-            console.log(session.email);
-
+            session.username = logindata.username;
+            console.log(session.username);
             return result;
         }
         else {

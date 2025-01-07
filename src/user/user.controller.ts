@@ -1,7 +1,8 @@
-import { Body, Controller, Get, InternalServerErrorException, Param, Put, Session, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, InternalServerErrorException, Param, Post, Put, Req, Session, UnauthorizedException, UseGuards } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { UpdateDTO } from "./user.dto";
 import { AuthGuard } from "src/auth/auth.guard";
+import { TaskDTO } from "./task.dto";
 
 @Controller('user')
 export class UserController{
@@ -28,5 +29,16 @@ export class UserController{
             throw new InternalServerErrorException("Failed to update profile");
         }
 
+    }
+
+    @Post('/asigntask')
+    async asigntask(@Body() taskinfo: TaskDTO, @Req() req){
+        const creator = req.user; 
+        // console.log('Session Data:', session);
+        // if (!session.username) {
+        //     throw new UnauthorizedException('User is not logged in');
+        // }
+        // const taskCreator = await this.userservice.findOne(session.username);
+        return await this.userservice.asigntask(taskinfo, creator);
     }
 }

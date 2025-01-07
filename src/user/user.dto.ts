@@ -37,11 +37,18 @@ export class UserDTO {
 
     @IsNotEmpty({ message: 'Role is required' })
     role: any;
+
+    @IsNotEmpty({ message: 'task is required' })
+    task: any;
+
+    @IsNotEmpty({ message: 'tasks is required' })
+    tasks: any;
+
 }
 
 export class loginDTO {
-    @IsEmail()
-    email: string;
+    @IsNotEmpty()
+    username: string;
     @IsNotEmpty()
     password: string;
 }
