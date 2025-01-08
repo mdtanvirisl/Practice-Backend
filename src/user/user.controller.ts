@@ -1,8 +1,8 @@
-import { Body, Controller, Get, InternalServerErrorException, Param, Post, Put, Req, Session, UnauthorizedException, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, InternalServerErrorException, Param, ParseIntPipe, Post, Put, Req, Session, UnauthorizedException, UseGuards } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { UpdateDTO } from "./user.dto";
 import { AuthGuard } from "src/auth/auth.guard";
-import { TaskDTO } from "./task.dto";
+import { TaskDTO, UpdateTaskStatusDTO } from "./task.dto";
 
 @Controller('user')
 export class UserController{
@@ -32,13 +32,23 @@ export class UserController{
     }
 
     @Post('/asigntask')
-    async asigntask(@Body() taskinfo: TaskDTO, @Req() req){
-        const creator = req.user; 
-        // console.log('Session Data:', session);
+    asigntask(@Body() taskinfo: TaskDTO, @Session() session){
+        const creator = session.username;
+        console.log(session.username);
         // if (!session.username) {
         //     throw new UnauthorizedException('User is not logged in');
         // }
-        // const taskCreator = await this.userservice.findOne(session.username);
-        return await this.userservice.asigntask(taskinfo, creator);
+        // const Creator = this.userservice.findOne(session.username);
+        return this.userservice.asigntask(taskinfo, creator);
+    }
+
+    @Post('/updatetask/stutus/:id')
+    updateTask(@Param('id', ParseIntPipe) id: number, @Body() UpdateTaskStatusDTO: UpdateTaskStatusDTO){
+        try {
+            return this.userservice.updateStutus(id, UpdateTaskStatusDTO);
+        }
+        catch {
+            throw new InternalServerErrorException("Failed to update profile");
+        }
     }
 }

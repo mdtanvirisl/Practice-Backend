@@ -1,3 +1,4 @@
+import { Optional } from "@nestjs/common";
 import { IsNotEmpty, IsString, IsDate, IsArray } from "class-validator";
 
 export class TaskDTO {
@@ -12,4 +13,9 @@ export class TaskDTO {
     @IsNotEmpty()
     @IsArray()
     assignedTo: number[];
+}
+
+export class UpdateTaskStatusDTO{
+    @Optional()
+    status: string;
 }

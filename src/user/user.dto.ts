@@ -38,10 +38,10 @@ export class UserDTO {
     @IsNotEmpty({ message: 'Role is required' })
     role: any;
 
-    @IsNotEmpty({ message: 'task is required' })
+    @Optional()
     task: any;
 
-    @IsNotEmpty({ message: 'tasks is required' })
+    @Optional()
     tasks: any;
 
 }

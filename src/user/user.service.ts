@@ -4,7 +4,7 @@ import { In, Repository } from "typeorm";
 import { UserEntity } from "./user.entity";
 import { JwtService } from "@nestjs/jwt";
 import { loginDTO, UpdateDTO } from "./user.dto";
-import { TaskDTO } from "./task.dto";
+import { TaskDTO, UpdateTaskStatusDTO } from "./task.dto";
 import { TaskEntity } from "./task.entity";
 
 @Injectable()
@@ -39,14 +39,21 @@ export class UserService {
     async asigntask(taskinfo: TaskDTO, creator: UserEntity): Promise<any>{
         const { title, description, assignedTo } = taskinfo;
 
+        const creatorid = await this.userRepo.findOneBy(creator);
+
         const assignees = await this.userRepo.find({where: {userid: In(assignedTo),},}); 
 
         const task = this.taskRepo.create({
             title,
             description,
             assignedTo: assignees,
-            createdBy: creator,
+            createdBy: creatorid,
         });
         return await this.taskRepo.save(task);
+    }
+
+    async updateStutus(id: number, UpdateTaskStatusDTO: UpdateTaskStatusDTO): Promise<any>{
+        await this.taskRepo.update({ id: id }, UpdateTaskStatusDTO);
+        return await this.taskRepo.findOneBy({ id: id });
     }
 }
