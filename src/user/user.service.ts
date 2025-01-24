@@ -25,8 +25,20 @@ export class UserService {
         return await this.userRepo.save(myobj);
     }
     async findOne(logindata: loginDTO): Promise<any> {
-        return await this.userRepo.findOneBy({ username: logindata.username });
+        // return await this.userRepo.findOneBy({ username: logindata.username });
+        const query = this.userRepo.findOne({where: {username: logindata.username }, relations: ['role']});
+
+        return query;
     }
+
+    // async findOnes(username: string): Promise<UserEntity | null> {
+    //     const query = this.userRepo
+    //       .createQueryBuilder('user')
+    //       .where('user.username = :username', { username })
+    //       .leftJoinAndSelect('user.roles', 'role')
+    
+    //     return await query.getOne();
+    //   }
 
     async showProfile(username: string): Promise<UserEntity> {
         return await this.userRepo.findOne({where: { username }, relations: ['role']});

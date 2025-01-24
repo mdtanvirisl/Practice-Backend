@@ -10,7 +10,6 @@ import { CreateRoleDTO } from "src/role/role.dto";
 export class AuthService {
     constructor(
         private userservice: UserService,
-        private roleservice: RoleService,
         private jwtService: JwtService
     ) { }
     async signup(user: UserDTO): Promise<UserDTO> {
@@ -23,10 +22,14 @@ export class AuthService {
             throw new UnauthorizedException('Invalid email or password');
         }
         const isMatch = await bcrypt.compare(logindata.password, user.password);
+        
         if (!isMatch) {
             throw new UnauthorizedException('Invalid email or password');
         }
-        const payload = logindata;
+        const payload = {
+            username: user.username,
+            roles: user.role.role,
+          };
         
         return {
             access_token: await this.jwtService.signAsync(payload),

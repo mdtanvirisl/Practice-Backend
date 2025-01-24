@@ -13,7 +13,7 @@ import { TaskEntity } from "./task.entity";
     imports: [ TypeOrmModule.forFeature([UserEntity, TaskEntity]),
     JwtModule.register({
         global: true,
-        secret: "3NP_Backend_Warehouse",
+        secret: "3NP_Backend_Practice",
         signOptions: { expiresIn: '30m' },
     }),forwardRef(() => AuthModule)],
     controllers: [UserController],
