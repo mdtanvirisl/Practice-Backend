@@ -1,4 +1,4 @@
-import { Body, Controller, Get, InternalServerErrorException, Param, ParseIntPipe, Post, Put, Query, Req, Res, Session, UnauthorizedException, UseGuards } from "@nestjs/common";
+import { Body, Controller, Delete, Get, HttpException, HttpStatus, InternalServerErrorException, Param, ParseIntPipe, Post, Put, Query, Req, Res, Session, UnauthorizedException, UseGuards } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { UpdateDTO } from "./user.dto";
 import { AuthGuard } from "src/auth/auth.guard";
@@ -11,7 +11,7 @@ import { SessionGuard } from "src/auth/session.guard";
 export class UserController{
     constructor(private readonly userservice: UserService){}
     
-    @Roles('Hr')
+    @Roles('Hr', 'Manager')
     @UseGuards(RolesGuard)
     @UseGuards(AuthGuard)
     @Get('/all_staffs')
@@ -63,9 +63,28 @@ export class UserController{
     @UseGuards(RolesGuard)
     @UseGuards(AuthGuard)
     @Post('/asigntask')
-    asigntask(@Body() taskinfo: TaskDTO, @Session() session){
-        const creator = session.username;
+    asigntask(@Body() taskinfo: TaskDTO, @Req() req){
+        const creator = req.user.username;
+        console.log('Creator: ', creator);
         return this.userservice.asigntask(taskinfo, creator);
+    }
+
+    @Roles('Manager')
+    @UseGuards(RolesGuard)
+    @UseGuards(AuthGuard)
+    @Delete('/deletetask/:id')
+    async deleteTask(@Param('id') id: number, @Req() req) {
+        const username = req.user.username;
+        try {
+        const result = await this.userservice.deleteTask(id, username);
+        if (result) {
+            return { message: 'Task deleted successfully' };
+        } else {
+            throw new HttpException('Task not found or unauthorized', HttpStatus.NOT_FOUND);
+        }
+        } catch (error) {
+        throw new HttpException('Failed to delete task', HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     @Roles('Manager')
@@ -82,6 +101,9 @@ export class UserController{
     }
 
 
+    @Roles('Manager')
+    @UseGuards(RolesGuard)
+    @UseGuards(AuthGuard)
     @Get('/alltasks')
     async showAllTasks(@Session() session) {
         const creator = session.username;

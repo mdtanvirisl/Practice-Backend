@@ -1,4 +1,4 @@
-import { Injectable } from "@nestjs/common";
+import { HttpException, HttpStatus, Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
 import { In, Like, Repository } from "typeorm";
 import { UserEntity } from "./user.entity";
@@ -63,18 +63,47 @@ export class UserService {
     async asigntask(taskinfo: TaskDTO, creator: any): Promise<any>{
         const { title, description, assignedTo } = taskinfo;
 
-        const creatorid = await this.userRepo.findOneBy({username: creator});
-
+        const creatorinfo = await this.userRepo.findOneBy({username: creator});
+        console.log(creatorinfo)
         const assignees = await this.userRepo.find({where: {userid: In(assignedTo),},}); 
 
         const task = this.taskRepo.create({
             title,
             description,
             assignedTo: assignees,
-            createdBy: creatorid,
+            createdBy: creatorinfo,
         });
         return await this.taskRepo.save(task);
     }
+
+    async deleteTask(id: number, username: string): Promise<any> {
+        try {
+          // Find the task by ID and creator
+          const task = await this.taskRepo.findOne({ where: { id }, relations: ['createdBy'], });
+    
+          if (!task) {
+            return false; // Task not found or unauthorized access
+          }
+    
+          // Delete the task
+          await this.taskRepo.remove(task); // Remove the task entity
+          return true; // Task successfully deleted
+        } catch (error) {
+          console.error('Error deleting task:', error);
+          throw new HttpException('Failed to delete task', HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+      }
+
+    async deleteTaskbyId(id: string): Promise<boolean> {
+        try {
+          const deleteResult = await this.taskRepo.delete(id);
+          return deleteResult.affected > 0;
+        } catch (error) {
+          console.error('Error deleting task:', error);
+          throw new Error('Failed to delete task');
+        }
+    }
+
     async getAllTasks(creator: string): Promise<TaskEntity[]> {
         return this.taskRepo.find({
             where: { createdBy: { username: creator } },
