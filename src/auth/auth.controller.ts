@@ -50,7 +50,7 @@ export class AuthController{
         const result = await this.authservice.signin(logindata);
         if (result) {
             session.username = logindata.username;
-            // console.log(session.username);
+            console.log(session.username);
             return result;
         }
         else {

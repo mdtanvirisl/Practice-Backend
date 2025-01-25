@@ -1,6 +1,6 @@
 import { Injectable } from "@nestjs/common";
 import { InjectRepository } from "@nestjs/typeorm";
-import { In, Repository } from "typeorm";
+import { In, Like, Repository } from "typeorm";
 import { UserEntity } from "./user.entity";
 import { JwtService } from "@nestjs/jwt";
 import { loginDTO, UpdateDTO } from "./user.dto";
@@ -16,9 +16,16 @@ export class UserService {
 
     @InjectRepository(TaskEntity)
     private taskRepo: Repository<TaskEntity>,
-        
-        
     ) { }
+
+    async getUsersByusername(username: string): Promise<UserEntity> {
+        return await this.userRepo.findOne({
+            where: {
+                username: username,
+            },
+            relations: ['role']
+        });
+    }
 
     async addUser(myobj: UserEntity): Promise<UserEntity> {
         
@@ -31,14 +38,19 @@ export class UserService {
         return query;
     }
 
-    // async findOnes(username: string): Promise<UserEntity | null> {
-    //     const query = this.userRepo
-    //       .createQueryBuilder('user')
-    //       .where('user.username = :username', { username })
-    //       .leftJoinAndSelect('user.roles', 'role')
-    
-    //     return await query.getOne();
-    //   }
+    async getStaffs(): Promise<UserEntity[]> {
+        return await this.userRepo.find({
+            relations: ['role'], // Include the role relationship
+        });
+    }
+
+    async searchStaff(name: string): Promise<UserEntity[]> {
+        return await this.userRepo.find({
+            where: {
+                name: Like(name + '%')
+            },
+        });
+    }
 
     async showProfile(username: string): Promise<UserEntity> {
         return await this.userRepo.findOne({where: { username }, relations: ['role']});
@@ -48,10 +60,10 @@ export class UserService {
         return await this.userRepo.findOneBy({ username: username });
     }
 
-    async asigntask(taskinfo: TaskDTO, creator: UserEntity): Promise<any>{
+    async asigntask(taskinfo: TaskDTO, creator: any): Promise<any>{
         const { title, description, assignedTo } = taskinfo;
 
-        const creatorid = await this.userRepo.findOneBy(creator);
+        const creatorid = await this.userRepo.findOneBy({username: creator});
 
         const assignees = await this.userRepo.find({where: {userid: In(assignedTo),},}); 
 
@@ -62,6 +74,12 @@ export class UserService {
             createdBy: creatorid,
         });
         return await this.taskRepo.save(task);
+    }
+    async getAllTasks(creator: string): Promise<TaskEntity[]> {
+        return this.taskRepo.find({
+            where: { createdBy: { username: creator } },
+            relations: ["createdBy", "assignedTo"], // Include related entities
+        });
     }
 
     async updateStutus(id: number, UpdateTaskStatusDTO: UpdateTaskStatusDTO): Promise<any>{

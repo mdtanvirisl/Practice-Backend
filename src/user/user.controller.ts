@@ -1,4 +1,4 @@
-import { Body, Controller, Get, InternalServerErrorException, Param, ParseIntPipe, Post, Put, Req, Res, Session, UnauthorizedException, UseGuards } from "@nestjs/common";
+import { Body, Controller, Get, InternalServerErrorException, Param, ParseIntPipe, Post, Put, Query, Req, Res, Session, UnauthorizedException, UseGuards } from "@nestjs/common";
 import { UserService } from "./user.service";
 import { UpdateDTO } from "./user.dto";
 import { AuthGuard } from "src/auth/auth.guard";
@@ -11,6 +11,24 @@ import { SessionGuard } from "src/auth/session.guard";
 export class UserController{
     constructor(private readonly userservice: UserService){}
     
+    @Roles('Admin', 'Manager')
+    @UseGuards(RolesGuard)
+    @UseGuards(AuthGuard)
+    @Get('/all_staffs')
+    getWarehouse(): object {
+        try {
+            return this.userservice.getStaffs();
+        }
+        catch {
+            return { error: 'invalid' };
+        }
+    }
+    // @UseGuards(AuthGuard)
+    @Get('getusers/:username')
+    getUsersByEmail(@Param('username') username: string): object {
+        return this.userservice.getUsersByusername(username);
+    }
+
     @UseGuards(SessionGuard)
     @UseGuards(AuthGuard)
     @Get('viewprofile')
@@ -24,7 +42,6 @@ export class UserController{
         }
     }
 
-    @UseGuards(AuthGuard)
     @Get('/getimage/:name')
     getImages(@Param('name') name: string, @Res() res) {
         res.sendFile(name, { root: './upload' })
@@ -48,11 +65,6 @@ export class UserController{
     @Post('/asigntask')
     asigntask(@Body() taskinfo: TaskDTO, @Session() session){
         const creator = session.username;
-        console.log(session.username);
-        // if (!session.username) {
-        //     throw new UnauthorizedException('User is not logged in');
-        // }
-        // const Creator = this.userservice.findOne(session.username);
         return this.userservice.asigntask(taskinfo, creator);
     }
 
@@ -66,6 +78,24 @@ export class UserController{
         }
         catch {
             throw new InternalServerErrorException("Failed to update profile");
+        }
+    }
+
+
+    @Get('/alltasks')
+    async showAllTasks(@Session() session) {
+        const creator = session.username;
+        return this.userservice.getAllTasks(creator);
+    }
+
+    @Get('/search_staff')
+    searchCustomer(@Query() query: { name: string }): object {
+        const { name } = query;
+        try {
+            return this.userservice.searchStaff(name);
+        }
+        catch {
+            throw new InternalServerErrorException("Failed to search");
         }
     }
 }
