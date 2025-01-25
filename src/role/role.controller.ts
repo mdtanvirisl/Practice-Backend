@@ -17,7 +17,7 @@ export class RoleController {
         return await this.roleService.createRole(createRoleDto);
     }
 
-    @Roles('Admin')
+    @Roles('Admin', 'Hr')
     @UseGuards(RolesGuard)
     @UseGuards(AuthGuard)
     @Get('/showrole')

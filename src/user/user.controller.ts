@@ -11,7 +11,7 @@ import { SessionGuard } from "src/auth/session.guard";
 export class UserController{
     constructor(private readonly userservice: UserService){}
     
-    @Roles('Admin', 'Manager')
+    @Roles('Hr')
     @UseGuards(RolesGuard)
     @UseGuards(AuthGuard)
     @Get('/all_staffs')

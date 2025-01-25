@@ -1,10 +1,13 @@
-import { Body, Controller, HttpException, HttpStatus, Post, Req, Session, UnauthorizedException, UploadedFile, UseInterceptors, UsePipes, ValidationPipe } from "@nestjs/common";
+import { Body, Controller, HttpException, HttpStatus, Post, Req, Session, UnauthorizedException, UploadedFile, UseGuards, UseInterceptors, UsePipes, ValidationPipe } from "@nestjs/common";
 import { AuthService } from "./auth.service";
 import { loginDTO, UserDTO } from "src/user/user.dto";
 import { FileInterceptor } from '@nestjs/platform-express';
 import { MulterError, diskStorage } from 'multer';
 import * as bcrypt from 'bcrypt';
 import { RoleService } from "src/role/role.service";
+import { AuthGuard } from "./auth.guard";
+import { RolesGuard } from "./roles.guard";
+import { Roles } from "./roles.decorator";
 
 @Controller('auth')
 export class AuthController{
@@ -13,6 +16,9 @@ export class AuthController{
         private roleservice: RoleService
     ){}
 
+    @Roles('Hr')
+    @UseGuards(RolesGuard)
+    @UseGuards(AuthGuard)
     @Post('signup')
     @UseInterceptors(FileInterceptor('myfile',
         {
