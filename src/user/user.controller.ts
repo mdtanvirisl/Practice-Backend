@@ -42,6 +42,11 @@ export class UserController{
         }
     }
 
+    @Delete('deleteuser/:id')
+    deleteUser(@Param('id') id: number): object {
+        return this.userservice.deleteUserById(id);
+    }
+
     @Get('/getimage/:name')
     getImages(@Param('name') name: string, @Res() res) {
         res.sendFile(name, { root: './upload' })
@@ -65,7 +70,6 @@ export class UserController{
     @Post('/asigntask')
     asigntask(@Body() taskinfo: TaskDTO, @Req() req){
         const creator = req.user.username;
-        console.log('Creator: ', creator);
         return this.userservice.asigntask(taskinfo, creator);
     }
 

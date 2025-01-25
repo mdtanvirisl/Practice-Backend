@@ -55,9 +55,19 @@ export class UserService {
     async showProfile(username: string): Promise<UserEntity> {
         return await this.userRepo.findOne({where: { username }, relations: ['role']});
     }
+    
     async updateProfile(username: string, UpdateInfo: UpdateDTO): Promise<any> {
         await this.userRepo.update({ username: username }, UpdateInfo);
         return await this.userRepo.findOneBy({ username: username });
+    }
+
+    async deleteUserById(id: number): Promise<any> {
+        const user = await this.userRepo.findOne({ where: { userid: id } });
+        if (!user) {
+            return { success: false, message: `User with ID ${id} not found.` };
+        }
+        await this.userRepo.remove(user);
+        return { success: true, message: `User with ID ${id} deleted successfully.` };
     }
 
     async asigntask(taskinfo: TaskDTO, creator: any): Promise<any>{
